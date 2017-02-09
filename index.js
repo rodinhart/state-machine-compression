@@ -12,10 +12,14 @@ const table = [
   [N, N, 0, 1]
 ]
 
-const src = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+const src = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0]
+console.log()
 console.log(src)
 console.log("src length: " + src.length + " bits")
-
+const histo = [0, 0]
+src.forEach(x => histo[x]++)
+console.log("histo " + histo.join(", "))
+console.log("optimum " + histo.reduce((a, x) => a + x * Math.log(src.length / x) / Math.log(2), 0))
 // encode
 var state, s, tar
 
