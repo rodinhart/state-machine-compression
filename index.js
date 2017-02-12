@@ -16,6 +16,9 @@ const src = [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 console.log(src)
 console.log("src length: " + src.length + " bits")
 
+console.log()
+table.forEach(x => console.log(x.map(y => y === undefined ? " " : y).join(" ")))
+
 // encode
 var state, s, tar
 
