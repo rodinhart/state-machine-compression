@@ -32,8 +32,8 @@ for (i = 0; i < table.length; i++) table[i] = []
 free = 1
 for (i = 0; i < table.length; i++) {
   for (symbol = 0; symbol < 256; symbol++) {
-    if (hist[symbol] === 0) continue
-    if (free < table.length && (i % hist[symbol]) === 0) {
+    if (free >= table.length) break
+    if (hist[symbol] !== 0 && (i % hist[symbol]) === 0) {
       table[free][256] = i
       table[free][257] = symbol
       table[i][symbol] = free++
@@ -45,7 +45,7 @@ var buffer, state
 
 console.log("Encoding...")
 buffer = []
-state = 0
+state = 0 // never output as code?
 for (i = 0; i < source.length; i++) {
   symbol = source[i]
   if (table[state][symbol] === undefined) {
