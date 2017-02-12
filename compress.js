@@ -60,18 +60,21 @@ if (state !== 0) buffer.push(state) // 12 bits
 
 console.log("Target length: " + (buffer.length * 1.5))
 
-var copy
+var copy, tmp
 
 console.log("Decoding...")
 copy = []
 for (i = 0; i < buffer.length; i++) {
   state = buffer[i]
+  tmp = []
   while (true) {
     if (table[state][256] === undefined) break
-    copy.push(table[state][257])
+    tmp.unshift(table[state][257])
     state = table[state][256]
   }
+
+  copy = copy.concat(tmp)
 }
 
 console.log("Copy length: " + copy.length)
-fs.writeFileSync("copy.txt", Buffer.from(copy))
+fs.writeFileSync("_copy.js", Buffer.from(copy))
