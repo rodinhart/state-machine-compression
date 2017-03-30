@@ -1,10 +1,10 @@
 "use strict"
 
 const fs = require("fs")
-const kb = x => Math.round(x / 1000) + "Kb"
+const kb = x => x + " bytes"//Math.round(x / 1000) + "Kb"
 
 console.log("Reading file...")
-const source = fs.readFileSync("./public/ZarchEncrypted.txt")
+const source = fs.readFileSync("./CanvasTest.html")
 console.log("Source length: " + kb(source.length))
 
 var hist, i, max, symbol
@@ -21,8 +21,8 @@ for (i = 0; i < source.length; i++) {
 }
 
 console.log("Optimal: " + kb(hist.reduce((a, x) =>
-  a + (x !== 0 ? x * Math.log(source.length / x) / Math.log(2) : 0)
-  , 0) / 8))
+  a + (x !== 0 ? x * Math.log(source.length / x) / Math.log(2) : 0),
+  0) / 8))
 
 for (i = 0; i < 256; i++) {
   hist[i] = hist[i] !== 0 ? Math.round(max / hist[i]) : 0
@@ -84,4 +84,4 @@ for (i = 0; i < buffer.length; i++) {
 }
 
 console.log("Copy length: " + kb(copy.length))
-fs.writeFileSync("./public/_copy.txt", Buffer.from(copy))
+fs.writeFileSync("./_copy.html", Buffer.from(copy))
