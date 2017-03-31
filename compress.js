@@ -8,8 +8,6 @@ const compress = source => {
   var raw, target
 
   const hist = util.getHistogram(source)
-  console.error("Optimal: " + util.formatSize(util.getOptimal(hist, source.length)))
-
   const decoding = util.getDecoding(hist)
   const encoding = util.getEncoding(decoding)
 

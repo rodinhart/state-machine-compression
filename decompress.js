@@ -35,14 +35,14 @@ const decode = (decoding, codes) => {
 
 // decompress :: Buffer -> Buffer
 const decompress = source => {
-  var data, i, raw
+  var hist, i, raw
 
-  data = []
+  hist = []
   for (i = 0; i < util.S; i++) {
-    data[i] = source.readUInt32LE(4 * i)
+    hist[i] = source.readUInt32LE(4 * i)
   }
 
-  const decoding = util.getDecoding({ data: data })
+  const decoding = util.getDecoding(hist)
   const encoding = util.getEncoding(decoding)
 
   raw = source.slice(4 * util.S)

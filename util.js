@@ -3,6 +3,8 @@
 const S = 256
 const L = 4096
 
+const formatSize = size => Math.ceil(size) + " bytes"
+
 // getDecoding :: Histogram -> Decoding
 const getDecoding = hist => {
   var c, i, l, table
@@ -66,6 +68,8 @@ const getHistogram = file => {
     if (hist[c] === 0) count++
     hist[c]++
   }
+
+  console.error("Optimal: " + formatSize(getOptimal(hist, file.length)))
 
   hist = (() => {
     var best, c, data, f, t, total
@@ -140,7 +144,7 @@ const writeStdout = bytes => {
 module.exports = {
   L: L,
   S: S,
-  formatSize: size => Math.ceil(size) + " bytes",
+  formatSize: formatSize,
   getDecoding: getDecoding,
   getEncoding: getEncoding,
   getHistogram: getHistogram,
