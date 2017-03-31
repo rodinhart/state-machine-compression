@@ -22,8 +22,9 @@ It has a length of 7, and the only possible symbols are `A` and `B`. We can cons
 
 Symbol | N
 :---: | :---:
-A | 5
+A | 6
 B | 1
+total | 7
 
 Now we need to set the number of codes used in the target, for this example we set `L = 4`. With this we need to normalise the histogram so the total occurrence is `L`.
 
@@ -31,10 +32,11 @@ Symbol | n
 :---: | :---:
 A | 3
 B | 1
+total | 4
 
 Care must be taken that any symbol occuring in the source has at least 1 occurence in the normalised histogram, otherwise it cannot be encoded.
 
-Next step is to construct the decoding table (yes, decoding table first). For each symbol we place `n` entries in the decoding table, numbered between `n` (inclusive) and `2n` (exclusive). Each entry in the table transitions the state by outputting a symbol and taking in code bits if needed. The state is number from `L` to `2L`.
+Next step is to construct the decoding table (yes, *decoding* table first). For each symbol we place `n` entries in the decoding table, numbered between `n` (inclusive) and `2n` (exclusive). Each entry in the table transitions the state by outputting a symbol and taking in code bits if needed. The state is numbered from `L` to `2L`.
 
 State | Symbol | New
 :---: | :---: | :---:
@@ -43,7 +45,7 @@ State | Symbol | New
 6 | A | 5
 7 | B | 1
 
-For example, if the current state is `4`, we output an `A` and set the new state to `3`. Now, `3` is not between the range `L` and `2L` so we will shift in a bit from the compressed stream, given us either `6` or `7`. This is in range so we can decode the next symbol. Otherwise we shift in another bit until we are in range.
+For example, if the current state is `4`, we output an `A` and set the new state to `3`. Now, `3` is not between `L` and `2L` so we will left-shift in a bit from the compressed stream, given us either `6` or `7`. This is in range so we can decode the next symbol. Otherwise we shift in another bit until we are in range.
 
 For a more complete example, our initial state is `6` and our compressed bits are `1`, `0`, `0`, and `0`.
 
