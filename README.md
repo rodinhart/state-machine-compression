@@ -36,6 +36,8 @@ total | 4
 
 Care must be taken that any symbol occuring in the source has at least 1 occurence in the normalised histogram, otherwise it cannot be encoded.
 
+### Decoding
+
 Next step is to construct the decoding table (yes, *decoding* table first). For each symbol we place `n` entries in the decoding table, numbered between `n` (inclusive) and `2n` (exclusive). Each entry in the table transitions the state by outputting a symbol and taking in code bits if needed. The state is numbered from `L` to `2L`.
 
 State | Symbol | New
@@ -63,7 +65,27 @@ And we get back the original source `AAABAAA`. The size of the original is 7 bit
 
 Looking at the decoding table, we can see the compression comes about because less frequent symbols end up in lower states, and therefore require more bits to get back into range.
 
-(coding)
+### Encoding
+
+To reverse the process we need the encoding table. For state transitions not involving shifting bits we can read them directly from the decoding table. These go back from `4` to `5`, and from `5` to `6`, both encoding `A`.
+
+State | A | B
+:---: | :---: | :---:
+4 | 5
+5 | 6
+6 |
+7 |
+
+In other words, starting from state `4` encoding `A` results in new state `5`. Now let us have a look at the very first row in the decoding table. How could we transition from `3` to `4` encoding `A`? Remember that `3` is not in range so bits must have been right-shifted out. In this case it involves 1 bit (to get `3` between `L` and `2L`). The two transitions are from `6` to `8`, shifting out `0`, or from `7` to `9`, shifting out `1`. Updating our table.
+
+State | A | B
+:---: | :---: | :---:
+4 | 5
+5 | 6
+6 | 8
+7 | 9
+
+Finally the last row, involving `B` we need to go from `1` to `7`, involving 2 bits. The four transitions are `4` to `28`, `5` to `29`, `6` to `30` and `7` to `31`. This completes the table.
 
 State | A | B
 :---: | :---: | :---:
