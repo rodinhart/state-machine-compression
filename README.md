@@ -94,6 +94,10 @@ State | A | B
 6 | 8 | 30
 7 | 9 | 31
 
+In other words, starting from state `5` encoding `B` results in new state `29`. To get back into range we shift out `1` to get `14`, and then `0` to get `7`.
+
+With our encoding table, let us encode `AAABAAA`, starting with state `4`.
+
 State | Input | New | Output
 :---: | :---: | :---: | :---
 4 | A | 5
@@ -103,5 +107,11 @@ State | Input | New | Output
 7 | A | 9 | 1
 4 | A | 5
 5 | A | 6
+
+Our compressed stream is therefore final state `6`, and the bits `1`, `0`, `0` and `0`. Note that the bits are produced in the opposite order they are consumed. But also, the symbols are in reverse, so best encoding back-to-front.
+
+## Full system
+
+The full system works exactly like this, with 256 symbols (bytes) and `L = 4096` (12 bits).
 
 [1]: https://arxiv.org/pdf/1612.04662.pdf
