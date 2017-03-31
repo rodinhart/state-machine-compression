@@ -108,10 +108,10 @@ State | Input | New | Output
 4 | A | 5
 5 | A | 6
 
-Our compressed stream is therefore final state `6`, and the bits `1`, `0`, `0` and `0`. Note that the bits are produced in the opposite order they are consumed. But also, the symbols are in reverse, so best encoding back-to-front.
+Our compressed stream is therefore final state `6`, and the bits `1`, `0`, `0` and `0`. Note that the bits are produced in the opposite order they are consumed. But also, the symbols are in reverse, so best encode back-to-front.
 
 ## Full system
 
-The full system works exactly like this, with 256 symbols (bytes) and `L = 4096` (12 bits).
+The full system works exactly like this, with 256 symbols (bytes) and `L = 4096` (12 bits). In order to build the decoding and encoding tables when decompressing we also need the histogram stored in the compressed file.
 
 [1]: https://arxiv.org/pdf/1612.04662.pdf
