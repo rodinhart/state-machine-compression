@@ -8,22 +8,28 @@ const compress = source => {
   var raw, target
 
   const hist = util.getHistogram(source)
+  console.error("Optimal: " + util.formatSize(util.getOptimal(hist, source.length)))
+
   const decoding = util.getDecoding(hist)
   const encoding = util.getEncoding(decoding)
 
   raw = encode(encoding, source)
-  target = Buffer.alloc(4 * hist.data.length + raw.length)
-  hist.data.forEach((count, index) => {
+  console.error("Raw: " + util.formatSize(raw.length))
+
+  target = Buffer.alloc(4 * hist.length + raw.length)
+  hist.forEach((count, index) => {
     target.writeUInt32LE(count, 4 * index)
   })
   
-  raw.copy(target, 4 * hist.data.length)
+  raw.copy(target, 4 * hist.length)
 
   return target
 }
 
 // encode :: Encoding -> Buffer -> Buffer
 const encode = (encoding, file) => {
+  const L = encoding.length
+
   var b, bit, buf, byte, c, i, result, state
 
   buf = Buffer.alloc(file.length)
@@ -33,8 +39,8 @@ const encode = (encoding, file) => {
   state = encoding.length
   for (i = file.length - 1; i >= 0; i--) {
     c = file[i]
-    state = encoding[state - util.L][c]
-    while (state >= 2 * util.L) {
+    state = encoding[state - L][c]
+    while (state >= 2 * L) {
       byte = (byte << 1) | (state & 1)
       bit++
       if (bit === 8) {

@@ -2,12 +2,12 @@
 
 I have been trying to make sense of the [paper][1] *Lightweight compression with encryption based on Asymmetric Numeral System* by Jarek Duda, but I lack the mathematical background in this area to fully understand it. So I decided to attack it from the other end and code a working compressor and decompressor to help understand this compression scheme.
 
-## Usuage
-```
-node compress.js < example.txt > result.smc
-```
+## Usage
+The following commands will compress and decompress using the standard IO. Note that currently no bounds checking or error handling is performed, so it might fail with files that cannot be compressed at all, or compress insanely well.
 
 ```
+node compress.js < example.txt > result.smc
+
 node decompress.js < result.smc > _copy.txt
 ```
 

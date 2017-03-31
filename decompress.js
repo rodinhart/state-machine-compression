@@ -5,6 +5,8 @@ const util = require("./util.js")
 
 // decode :: Decoding -> Buffer -> Buffer
 const decode = (decoding, codes) => {
+  const L = decoding.length
+
   var b, bit, buf, byte, c, state
 
   buf = Buffer.alloc(10 * codes.length)
@@ -13,10 +15,10 @@ const decode = (decoding, codes) => {
   byte = codes.readUInt8(3)
   c = 4
   b = 0
-  while (codes.length - c > 0 || state !== decoding.length) {
-    buf.writeUInt8(decoding[state - decoding.length][0], b++)
-    state = decoding[state - decoding.length][1]
-    while (state < decoding.length) {
+  while (codes.length - c > 0 || state !== L) {
+    buf.writeUInt8(decoding[state - L][0], b++)
+    state = decoding[state - L][1]
+    while (state < L) {
       if (bit === 0) {
         byte = codes.readUInt8(c++)
         bit = 8
