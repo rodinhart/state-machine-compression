@@ -14,12 +14,12 @@ const compress = source => {
   raw = encode(encoding, source)
   console.error("Raw: " + util.formatSize(raw.length))
 
-  target = Buffer.alloc(4 * hist.length + raw.length)
+  target = Buffer.alloc(2 * hist.length + raw.length)
   hist.forEach((count, index) => {
-    target.writeUInt32LE(count, 4 * index)
+    target.writeUInt16LE(count, 2 * index)
   })
   
-  raw.copy(target, 4 * hist.length)
+  raw.copy(target, 2 * hist.length)
 
   return target
 }
@@ -28,10 +28,10 @@ const compress = source => {
 const encode = (encoding, file) => {
   const L = encoding.length
 
-  var b, bit, buf, byte, c, i, result, state
+  var b, bit, buf, byte, c, i, state
 
-  buf = Buffer.alloc(file.length)
-  b = 0
+  buf = Buffer.alloc(file.length) // can't grow
+  b = buf.length
   byte = 0
   bit = 0
   state = encoding.length
@@ -42,7 +42,7 @@ const encode = (encoding, file) => {
       byte = (byte << 1) | (state & 1)
       bit++
       if (bit === 8) {
-        buf.writeUInt8(byte, b++) // check overflow
+        buf.writeUInt8(byte, --b) // check underflow
         byte = 0
         bit = 0
       }
@@ -51,16 +51,11 @@ const encode = (encoding, file) => {
     }
   }
 
-  result = Buffer.alloc(2 + 1 + 1 + b)
-  result.writeUInt16LE(state, 0)
-  result.writeUInt8(bit, 2)
-  result.writeUInt8(byte, 3)
-
-  for (i = 0; i < b; i++) {
-    result.writeUInt8(buf.readUInt8(i), result.length - 1 - i)
-  }
+  buf.writeUInt16LE(state, b - 4)
+  buf.writeUInt8(bit, b - 2)
+  buf.writeUInt8(byte, b - 1)
   
-  return result
+  return buf.slice(b - 4)
 }
 
 // main
