@@ -112,6 +112,6 @@ Our compressed stream is therefore final state `6`, and the bits `1`, `0`, `0` a
 
 ## Full system
 
-The full system works exactly like this, with 256 symbols (bytes) and `L = 4096` (12 bits). In order to build the decoding and encoding tables when decompressing we also need the histogram stored in the compressed file.
+The full system works exactly like this, with 256 symbols (a byte) and `L = 4096` (12 bits). In order to build the decoding and encoding tables when decompressing we also need the histogram stored in the compressed file.
 
 [1]: https://arxiv.org/pdf/1612.04662.pdf
