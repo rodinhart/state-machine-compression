@@ -3,34 +3,35 @@
 // Imports.
 const util = require("./util.js")
 
-// decode :: Decoding -> Buffer -> Buffer
+// decode :: [(Number, Number)] -> Buffer -> Buffer
 const decode = (decoding, codes) => {
   const L = decoding.length
 
-  var b, bit, buf, byte, c, state
+  var bits, buf, pCode, pTar, state, target
 
-  buf = Buffer.alloc(10 * codes.length)
-  state = codes.readUInt16LE(0)
-  bit = codes.readUInt8(2)
-  byte = codes.readUInt8(3)
-  c = 4
-  b = 0
-  while (codes.length - c > 0 || state !== L) {
-    buf.writeUInt8(decoding[state - L][0], b++)
+  state = codes[0] | (codes[1] << 8)
+  bits = codes[2]
+  buf = codes[3]
+
+  target = Buffer.alloc(10 * codes.length)
+  pCode = 4
+  pTar = 0
+  while (codes.length - pCode > 0 || state !== L) {
+    target[pTar++] = decoding[state - L][0]
     state = decoding[state - L][1]
     while (state < L) {
-      if (bit === 0) {
-        byte = codes.readUInt8(c++)
-        bit = 8
+      if (bits === 0) {
+        buf = codes[pCode++]
+        bits = 8
       }
 
-      state = (state << 1) + (byte & 1)
-      byte = byte >>> 1
-      bit--
+      state = (state << 1) + (buf & 1)
+      buf = buf >>> 1
+      bits--
     }
   }
 
-  return buf.slice(0, b)
+  return target.slice(0, pTar)
 }
 
 // decompress :: Buffer -> Buffer

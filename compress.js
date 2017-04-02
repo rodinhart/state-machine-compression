@@ -26,38 +26,38 @@ const compress = source => {
   return target
 }
 
-// encode :: Encoding -> Buffer -> Buffer
-const encode = (encoding, file) => {
+// encode :: [[Number]] -> Buffer -> Buffer
+const encode = (encoding, source) => {
   const L = encoding.length
 
-  var b, bit, buf, byte, c, i, state
+  var bits, buf, codes, pCode, pSou, state
 
-  buf = Buffer.alloc(file.length) // can't grow
-  b = buf.length
-  byte = 0
-  bit = 0
+  codes = Buffer.alloc(source.length) // can't grow
+  pCode = codes.length
+  buf = 0
+  bits = 0
   state = encoding.length
-  for (i = file.length - 1; i >= 0; i--) {
-    c = file[i]
-    state = encoding[state - L][c]
+  for (pSou = source.length - 1; pSou >= 0; pSou--) {
+    state = encoding[state - L][source[pSou]]
     while (state >= 2 * L) {
-      byte = (byte << 1) | (state & 1)
-      bit++
-      if (bit === 8) {
-        buf.writeUInt8(byte, --b) // check underflow
-        byte = 0
-        bit = 0
+      buf = (buf << 1) | (state & 1)
+      bits++
+      if (bits === 8) {
+        codes[--pCode] = buf // check underflow
+        buf = 0
+        bits = 0
       }
 
       state = state >>> 1
     }
   }
 
-  buf.writeUInt16LE(state, b - 4)
-  buf.writeUInt8(bit, b - 2)
-  buf.writeUInt8(byte, b - 1)
+  codes[pCode - 4] = state
+  codes[pCode - 3] = state >> 8
+  codes[pCode - 2] = bits
+  codes[pCode - 1] = buf
   
-  return buf.slice(b - 4)
+  return codes.slice(pCode - 4)
 }
 
 // main
