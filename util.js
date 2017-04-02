@@ -3,54 +3,51 @@
 const S = 256
 const L = 4096
 
+//  formatSize :: Number -> String
 const formatSize = size => Math.ceil(size) + " bytes"
 
-// getDecoding :: Histogram -> Decoding
+// getDecoding :: Histogram -> [(Number, Number)]
 const getDecoding = hist => {
-  var c, i, l, table
+  var count, decoding, state, symbol
 
-  table = []
-  for (c = 0; c < hist.length; c++) {
-    l = hist[c]
-    i = l
-    while (i < 2 * l) {
-      table.push([c, i])
-      i++
-    }
+  decoding = []
+  for (symbol = 0; symbol < hist.length; symbol++) {
+    count = hist[symbol]
+    for (state = count; state < 2 * count; state++) decoding.push([symbol, state])
   }
 
-  return table
+  return decoding
 }
 
-// getEncoding :: Decoding -> Encoding
+// getEncoding :: [(Number, Number)] -> [[Number]]
 const getEncoding = decoding => {
   const L = decoding.length
 
-  var c, i, m, s, t, table
+  var encoding, i, m, prime, state, symbol
 
-  table = []
+  encoding = []
   for (i = 0; i < L; i++) {
-    table[i] = []
+    encoding[i] = []
   }
 
   for (i = 0; i < L; i++) {
-    c = decoding[i][0]
-    s = decoding[i][1]
-    t = 1
-    while (s < L) {
-      s = s << 1
-      t = t << 1
+    [symbol, state] = decoding[i]
+    m = 1
+    while (state < L) {
+      state = state << 1
+      m = m << 1
     }
 
-    m = t
-    while (t > 0) {
-      table[s - L][c] = (i + L) * m + m - t
-      s++
-      t--
+    prime = (i + L) * m
+    while (m > 0) {
+      encoding[state - L][symbol] = prime
+      state++
+      prime++
+      m--
     }
   }
 
-  return table
+  return encoding
 }
 
 // getHistogram :: Buffer -> [Number]

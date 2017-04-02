@@ -5,7 +5,7 @@ const util = require("./util.js")
 
 // compress :: Buffer -> Buffer
 const compress = source => {
-  var raw, target
+  var i, raw, target
 
   const hist = util.getHistogram(source)
   const decoding = util.getDecoding(hist)
@@ -14,12 +14,14 @@ const compress = source => {
   raw = encode(encoding, source)
   console.error("Raw: " + util.formatSize(raw.length))
 
-  target = Buffer.alloc(2 * hist.length + raw.length)
-  hist.forEach((count, index) => {
-    target.writeUInt16LE(count, 2 * index)
-  })
-  
-  raw.copy(target, 2 * hist.length)
+  target = Buffer.alloc(1.5 * hist.length + raw.length)
+  for (i = 0; i < hist.length; i += 2) {
+    target[1.5 * i] = hist[i]
+    target[1.5 * i + 1] = (hist[i] | (hist[i + 1] << 12)) >> 8
+    target[1.5 * i + 2] = hist[i + 1] >> 4
+  }
+
+  raw.copy(target, 1.5 * hist.length)
 
   return target
 }

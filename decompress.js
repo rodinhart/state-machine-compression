@@ -38,14 +38,15 @@ const decompress = source => {
   var hist, i
 
   hist = new Array(util.S)
-  for (i = 0; i < hist.length; i++) {
-    hist[i] = source.readUInt16LE(2 * i)
+  for (i = 0; i < hist.length; i += 2) {
+    hist[i] = (source[1.5 * i] | (source[1.5 * i + 1] << 8)) & 0xFFF
+    hist[i + 1] = (source[1.5 * i + 1] >> 4) | (source[1.5 * i + 2] << 4)
   }
 
   const decoding = util.getDecoding(hist)
   const encoding = util.getEncoding(decoding)
 
-  return decode(decoding, source.slice(2 * hist.length))
+  return decode(decoding, source.slice(1.5 * hist.length))
 }
 
 // main
