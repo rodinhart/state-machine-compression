@@ -2,6 +2,8 @@
 
 I have been trying to make sense of the [paper][1] *Lightweight compression with encryption based on Asymmetric Numeral System* by Jarek Duda, but I lack the mathematical background in this area to fully understand it. So I decided to attack it from the other end and code a working compressor and decompressor to help understand this compression scheme.
 
+The resulting code works, and compresses close to the optimal coding as far as I can tell. Absolutely no effort has been made to optimize the code, the main goal is readability. I still do not really understand the mathematical theory behind it, nor can I prove the code is correct, but I understand why compression takes place.
+
 ## Usage
 The following commands will compress and decompress using the standard IO. Note that currently no bounds checking or error handling is performed, so it might fail with files that cannot be compressed at all, or compress insanely well. Having said that, I have compressed a 144Mb CSV file to about 41% of its original size.
 
