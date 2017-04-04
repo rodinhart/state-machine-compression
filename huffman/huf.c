@@ -1,16 +1,25 @@
 #include <stdio.h>
 
-char *read(void) {
-  char *file, *ptr;
+typedef struct file {
+  char *bytes;
+  char *end;
+} File;
+
+File read(void) {
+  File *file;
+  char *ptr;
   int symbol;
 
-  file = ptr = (char *)malloc(10 * 1024);
+  file = (File *)malloc(sizeof(File));
+  file->bytes = ptr = (char *)malloc(10 * 1024);
 
   while ((symbol = getchar()) != EOF) {
     *(ptr++) = symbol;
   }
 
-  return file;
+  file->end = ptr;
+
+  return *file;
 }
 
 typedef struct node {
@@ -20,9 +29,10 @@ typedef struct node {
   int symbol;
 } node;
 
-node *histogram(char *source) {
-  int symbol;
+node *histogram(File file) {
   node *hist;
+  int symbol;
+  char *ptr;
 
   hist = (node *)malloc(512 * sizeof(node));
   for (symbol = 0; symbol < 512; symbol++) {
@@ -32,7 +42,11 @@ node *histogram(char *source) {
     hist[symbol].symbol = symbol;
   }
 
-  while (symbol = *(source++)) hist[symbol].count++;
+  ptr = file.bytes;
+  while (ptr < file.end) {
+    symbol = *(ptr++);
+    hist[symbol].count++;
+  }
 
   return hist;
 }
@@ -109,16 +123,25 @@ void print(node *n) {
   }
 }
 
+char *encode(node *tree, char *source) {
+
+}
+
+void write(File file) {
+  char *ptr;
+
+  ptr = file.bytes;
+  while (ptr < file.end) putchar(*(ptr++));
+}
+
 int main(int argc, char *argv[]) {
-  char *source;
-  int i;
+  File source;
   node *hist, *tree;
 
   source = read();
   hist = histogram(source);
   tree = hufftree(hist);
-
-  print(tree);
+  
 
   return 0;
 }
