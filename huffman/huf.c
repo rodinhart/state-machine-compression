@@ -1,6 +1,8 @@
 #include <stdio.h>
 
-typedef struct file {
+typedef enum { False, True } Bool;
+
+typedef struct {
   char *bytes;
   char *end;
 } File;
@@ -11,11 +13,9 @@ File read(void) {
   int symbol;
 
   file = (File *)malloc(sizeof(File));
-  file->bytes = ptr = (char *)malloc(10 * 1024);
+  ptr = file->bytes = (char *)malloc(16 * 1024);
 
-  while ((symbol = getchar()) != EOF) {
-    *(ptr++) = symbol;
-  }
+  while ((symbol = getchar()) != EOF) *(ptr++) = symbol;
 
   file->end = ptr;
 
@@ -27,14 +27,14 @@ typedef struct node {
   struct node *left;
   struct node *right;
   int symbol;
-} node;
+} Node;
 
-node *histogram(File file) {
-  node *hist;
+Node *histogram(File file) {
+  Node *hist;
   int symbol;
   char *ptr;
 
-  hist = (node *)malloc(512 * sizeof(node));
+  hist = (Node *)malloc(512 * sizeof(Node));
   for (symbol = 0; symbol < 512; symbol++) {
     hist[symbol].count = 0;
     hist[symbol].left = NULL;
@@ -51,24 +51,8 @@ node *histogram(File file) {
   return hist;
 }
 
-int compare(void *a, void *b) {
-  node *x, *y;
-
-  x = (node *)a;
-  y = (node *)b;
-
-  if (x->count < y->count) {
-    return -1;
-  } else if (x->count > y->count) {
-    return 1;
-  }
-
-  return 0;
-}
-
-node *hufftree(node *hist) {
+Node *hufftree(Node *hist) {
   int i, n, x, y;
-  node *tmp;
 
   n = 256;
   do {
@@ -109,7 +93,7 @@ node *hufftree(node *hist) {
   return &hist[y];
 }
 
-void print(node *n) {
+void print(Node *n) {
   if (n->left != NULL) {
     // node
     printf("(");
@@ -123,8 +107,110 @@ void print(node *n) {
   }
 }
 
-char *encode(node *tree, char *source) {
+typedef struct {
+  char *ptr;
+  int mask;
+  Bool valid;
+} Bits;
 
+// addBit :: Bool -> Bits -> Bits
+Bits addBit(Bool value, Bits bits) {
+  if (value == False) {
+    *(bits.ptr) &= ~bits.mask;
+  } else {
+    *(bits.ptr) |= bits.mask;
+  }
+
+  bits.mask <<= 1;
+  if (bits.mask == 0x100) {
+    bits.ptr++;
+    bits.mask = 0x01;
+  }
+
+  return bits;
+}
+
+// readBit :: Bits -> Bits
+Bits readBit(Bits bits) {
+  bits.valid = ((*(bits.ptr)) & bits.mask) == bits.mask ? True : False;
+  bits.mask <<= 1;
+  if (bits.mask == 0x100) {
+    bits.ptr++;
+    bits.mask = 0x01;
+  }
+
+  return bits;
+}
+
+// writeBits :: Int -> Node -> Bits -> Bits
+Bits writeBits(int symbol, Node *n, Bits bits) {
+  char *p;
+  Bits try;
+
+  if (n->left != NULL) {
+    try = addBit(False, bits);
+    try = writeBits(symbol, n->left, try);
+    if (try.valid == True) return try;
+
+    try = addBit(True, bits);
+    try = writeBits(symbol, n->right, try);
+    if (try.valid == True) return try;
+
+    bits.valid = False;
+    
+    return bits;
+  } else {
+    bits.valid = n->symbol == symbol ? True : False;
+
+    return bits;
+  }
+}
+
+File encode(Node *tree, File source) {
+  File target;
+  Bits bits;
+  char *ptr;
+
+  target.bytes = (char *)malloc(source.end - source.bytes);
+  bits.ptr = target.bytes;
+  bits.mask = 0x01;
+
+  ptr = source.bytes;
+  while (ptr < source.end) {
+    bits = writeBits(*(ptr++), tree, bits);
+    if (bits.valid == False) printf("Failed to encode symbol %d\n", *(ptr - 1)); 
+  }
+
+  if (bits.mask != 0x01) bits.ptr++;
+  target.end = bits.ptr;
+
+  return target;
+}
+
+File decode(Node *tree, File target, size_t length) {
+  File copy;
+  char *ptr;
+  Bits bits;
+  Node *cur;
+
+  ptr = copy.bytes = (char *)malloc(length);
+  copy.end = copy.bytes + length;
+
+  bits.ptr = target.bytes;
+  bits.mask = 0x01;
+  while (ptr < copy.end && bits.ptr < target.end) {
+    cur = tree;
+    while (cur->left != NULL) {
+      bits = readBit(bits);
+      cur = bits.valid == False ? cur->left : cur->right;
+    }
+
+    *(ptr++) = cur->symbol;
+  }
+
+  printf("Used: %d\n", bits.ptr - target.bytes);
+
+  return copy;
 }
 
 void write(File file) {
@@ -135,13 +221,20 @@ void write(File file) {
 }
 
 int main(int argc, char *argv[]) {
-  File source;
-  node *hist, *tree;
+  File copy, source, target;
+  Node *hist, *tree;
 
   source = read();
+  printf("Source: %d bytes\n", source.end - source.bytes);
   hist = histogram(source);
   tree = hufftree(hist);
-  
+  // print(tree); printf("\n");
+  target = encode(tree, source);
+  printf("Target: %d bytes\n", target.end - target.bytes);
+  // printf("Bits: %x %x\n", *(target.bytes), *(target.bytes + 1));
+  copy = decode(tree, target, source.end - source.bytes);
+  printf("Copy: %d bytes\n", copy.end - copy.bytes);
+  write(copy);
 
   return 0;
 }
